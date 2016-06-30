@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1467305570262
+Build-Jdk: 1.8.0_92
+Built-By: virtuser
+Bundle-ManifestVersion: 2
+Bundle-Name: ActiveMQ embedded with Camel
+Bundle-SymbolicName: com.demo.fuse-rest
+Bundle-Version: 1.0.0
+Created-By: Apache Maven Bundle Plugin
+Import-Package: javax.jws,javax.ws.rs;version="[2.0,3)",javax.ws.rs.core
+ ;version="[2.0,3)",org.apache.commons.dbcp2;version="[2.1,3)",org.codeh
+ aus.jackson.jaxrs;version="[1.9,2)",org.mariadb.jdbc
+Tool: Bnd-1.50.0

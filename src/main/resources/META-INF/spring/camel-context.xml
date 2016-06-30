@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Configures the Camel Context-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"       
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://camel.apache.org/schema/cxf
+       http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://cxf.apache.org/jaxrs
+       http://cxf.apache.org/schemas/jaxrs.xsd">
+
+
+<bean id="helloBean" class="com.demo.fuse.rest.TestServiceImpl" />
+<!--
+  local camel context or standalone
+<cxf:rsServer id="helloServer" address="http://0.0.0.0:8585/helloapp" loggingFeatureEnabled="true">
+-->
+  <cxf:rsServer id="helloServer" address="/helloapp" loggingFeatureEnabled="true">
+  <cxf:serviceBeans>
+     <ref bean="helloBean" />
+  </cxf:serviceBeans>
+  <cxf:providers>
+     <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+  </cxf:providers>
+</cxf:rsServer>
+  <camelContext xmlns="http://camel.apache.org/schema/spring">
+  <route>
+    <from uri="cxfrs:bean:helloServer" />
+
+    <log message="Processing CXF route....http method ${header.CamelHttpMethod}" />
+    <log message="Processing CXF route....path is ${header.CamelHttpPath}" />
+    <log message="Processing CXF route....body is ${body}" />
+    <to uri="direct:db"/>
+    </route>
+    
+    <route>
+    <from uri="direct:db"/>
+        <setExchangePattern pattern="InOut"/>
+   <setHeader headerName="mydata">
+		<simple>${body}</simple>
+	</setHeader>   
+	<log message="set body with header -${header.mydata}-" />
+    <setBody>
+ 		<simple>
+      	select * from demotable where id='${header.mydata}'
+      </simple>
+    </setBody>
+    <log message="calling jdbc"/>
+  <to uri="jdbc:dataSource?useHeadersAsParameters=true"/>	
+    <log message="${body}"/>
+	
+    </route>
+  </camelContext>
+<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+  <property name="driverClassName" value="org.mariadb.jdbc.Driver"/>
+  <property name="url" value="jdbc:mariadb://localhost:3306/demodb"/>
+  <property name="username" value="demouser"/>
+  <property name="password" value="password"/>
+</bean>
+</beans>
